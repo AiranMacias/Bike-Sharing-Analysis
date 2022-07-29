@@ -1,0 +1,56 @@
+select *
+from bike_share.bike_share_data;
+
+-- lets check if there are duplicate rows
+select count(distinct ride_id)
+from bike_share.bike_share_data;-- 5859473
+
+-- lets check if there are empty started_at
+select count(started_at) -- 5859473
+from bike_share.bike_share_data;
+
+-- lets check if there are empty started_at
+select count(ended_at) -- 5859473
+from bike_share.bike_share_data;
+
+-- so no NA or empty values on started at or ended at that can skew our results
+
+-- checking if there are empty values in start_time thats would skew our results
+select *
+from bike_share.bike_share_data
+Where started_at = ' ' ;
+
+-- checking if there are test rides
+select  *
+from bike_share.bike_share_data
+Where start_station_id Like '%Test%' or start_station_id Like '%TEST%' or start_station_id Like '%test%'
+or end_station_id Like '%Test%' or end_station_id Like '%TEST%' or end_station_id Like '%test%'; -- there are 1303 test rides
+
+-- lets remove rows that are test rides
+DELETE
+from bike_share.bike_share_data
+Where start_station_id Like '%Test%' or start_station_id Like '%TEST%' or start_station_id Like '%test%'
+or end_station_id Like '%Test%' or end_station_id Like '%TEST%' or end_station_id Like '%test%'; -- there are 1303 test rides
+-- permanently deleted test rides on database
+
+select ride_id,
+rideable_type as bike_type,
+started_at as start_time,
+ended_at as end_time,
+start_station_name,
+start_station_id,
+end_station_name ,
+end_station_id,
+member_casual as customer_type,
+TIMEDIFF(ended_at , started_at)  as time_duration_in_mins,
+CASE -- weekdays script
+WHEN weekday(started_at) = '0' THEN 'Monday'
+WHEN weekday(started_at) = '1' THEN 'Tuesday'
+WHEN weekday(started_at) = '2' THEN 'Wednesday'
+WHEN weekday(started_at) = '3' THEN 'Thursday'
+WHEN weekday(started_at) = '4' THEN 'Friday'
+WHEN weekday(started_at) = '5' THEN 'Saturday'
+WHEN weekday(started_at) = '6' THEN 'Sunday'
+END as day_of_the_week,
+MONTHNAME(started_at) as month_name
+from bike_share.bike_share_data;
